@@ -2,6 +2,7 @@ import User from "../models/user.models.js"
 import bcrypt from "bcryptjs"
 import { generateToken } from "../lib/utils.js";
 import cloudinary from "../lib/cloudinary.js";
+import { io } from "../socket/socket.js";  // Import io
 
 
 export const signUp = async (req,res) => {
@@ -34,6 +35,15 @@ export const signUp = async (req,res) => {
         {
             generateToken(newUser._id, res)
             await newUser.save();
+
+            // Emit socket event to notify all users that a new user has joined
+            io.emit('newUserJoined', {
+                _id: newUser._id,
+                fullName: newUser.fullName,
+                email: newUser.email,
+                profilePic: newUser.profilePic,
+                isOnline: true // The new user is online right after signup
+            });
 
             res.status(201).json({
                 _id: newUser._id,
@@ -137,6 +147,3 @@ export const checkAuth = (req, res) => {
         res.status(500).json({message: "Internal Server Error "})    
     }
 }
-
-
-

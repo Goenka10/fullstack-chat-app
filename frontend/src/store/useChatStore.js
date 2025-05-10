@@ -67,6 +67,33 @@ export const useChatStore = create()(
           updateUserLastMessage(newMessage.senderId, newMessage);
         });
         
+        // New event listener for when a new user joins
+        newSocket.on('newUserJoined', (newUser) => {
+          const { users } = get();
+          const authUser = useAuthStore.getState()?.authUser;
+          
+          // Don't add yourself to your own user list
+          if (newUser._id === authUser?._id) return;
+          
+          // Check if user already exists in the list
+          const userExists = users.some(user => user._id === newUser._id);
+          
+          if (!userExists) {
+            // Add the new user to the users list with default message info
+            const updatedUsers = [...users, {
+              ...newUser,
+              lastMessage: null,
+              lastMessageTime: null
+            }];
+            
+            set({ users: updatedUsers });
+            console.log(`New user ${newUser.fullName} joined the chat`);
+            
+            // Optionally show a toast notification
+            toast.success(`${newUser.fullName} joined the chat`);
+          }
+        });
+        
         newSocket.on('userOnline', (userId) => {
           const { onlineUsers, users } = get();
           if (!onlineUsers.includes(userId)) {
