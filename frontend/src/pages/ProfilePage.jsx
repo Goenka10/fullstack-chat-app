@@ -90,11 +90,8 @@ const ProfilePage = () => {
         const compressedImage = await compressImage(file);
         setSelectedImg(compressedImage);
         
-        // Pass the full user object with updated profile pic
-        await updateProfile({ 
-          ...userData, 
-          profilePic: compressedImage 
-        });
+        // Only send the profilePic, not the entire user object
+        await updateProfile({ profilePic: compressedImage });
         
         toast.dismiss();
         toast.success('Profile picture updated successfully');
@@ -113,11 +110,8 @@ const ProfilePage = () => {
           const base64Image = reader.result;
           setSelectedImg(base64Image);
           
-          // Pass the full user object with updated profile pic
-          await updateProfile({ 
-            ...userData, 
-            profilePic: base64Image 
-          });
+          // Only send the profilePic, not the entire user object
+          await updateProfile({ profilePic: base64Image });
           
           toast.success('Profile picture updated successfully');
         } catch (error) {
