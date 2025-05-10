@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 import { useAuthStore } from "./useAuthStore";
 
 // import.meta.env.MODE === "development"
-const BASE_URL = import.meta.env.MODE === "development" ? 'http://localhost:3000': "/"
+const BASE_URL = import.meta.env.MODE === "development" ? 'http://localhost:3000': window.location.origin;
 
 
 export const useChatStore = create()(
