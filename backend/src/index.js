@@ -27,10 +27,20 @@ app.use("/api/auth" , authRoutes);
 app.use("/api/messages" , messageRoutes);
 
 // Production static files - only one block needed
-if(process.env.NODE_ENV==="production")
-{
-    app.use(express.static(path.join(__dirname, "../frontend/dist")))
-}
+if (process.env.NODE_ENV === "production") {
+    // 1. Serve frontend's build artifacts
+    app.use(express.static(path.join(__dirname, "../frontend/dist")));
+  
+    // 2a. (Option A) Named wildcard fallback
+    app.get("/*splat", (req, res) => {
+      res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+    });
+  
+    // 2b. (Option B) Regex fallback
+    // app.get(/^.*$/, (req, res) => {
+    //   res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+    // });
+  }
 
 server.listen(PORT , () => {
     console.log("Listening on PORT:" + PORT)
