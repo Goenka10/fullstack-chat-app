@@ -5,9 +5,7 @@ import { axiosInstance } from "../lib/axios";
 import io from 'socket.io-client';
 import { useAuthStore } from "./useAuthStore";
 
-// import.meta.env.MODE === "development"
 const BASE_URL = import.meta.env.MODE === "development" ? 'http://localhost:3000': window.location.origin;
-
 
 export const useChatStore = create()(
   persist(
@@ -20,6 +18,22 @@ export const useChatStore = create()(
       socket: null,
       onlineUsers: [],
       typingUsers: {},
+      
+      // Function to update user's last message info
+      updateUserLastMessage: (userId, message) => {
+        const { users } = get();
+        const updatedUsers = users.map(user => {
+          if (user._id === userId) {
+            return {
+              ...user,
+              lastMessage: message.text || 'Sent an image',
+              lastMessageTime: message.createdAt || new Date().toISOString()
+            };
+          }
+          return user;
+        });
+        set({ users: updatedUsers });
+      },
       
       initSocket: (authUser) => {
         if (!authUser) return;
@@ -35,10 +49,9 @@ export const useChatStore = create()(
         });
         
         newSocket.on('messageReceived', (newMessage) => {
-          const { selectedUser, messages } = get();
+          const { selectedUser, messages, updateUserLastMessage } = get();
 
-          const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
-          if (!isMessageSentFromSelectedUser) return;
+          const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser?._id;
           
           if (selectedUser &&   
               (newMessage.senderId === selectedUser._id || 
@@ -49,6 +62,9 @@ export const useChatStore = create()(
               set({ messages: [...messages, newMessage] });
             }
           }
+          
+          // Update the user's last message info in the sidebar
+          updateUserLastMessage(newMessage.senderId, newMessage);
         });
         
         newSocket.on('userOnline', (userId) => {
@@ -123,7 +139,13 @@ export const useChatStore = create()(
         set({ isUsersLoading: true });
         try {
           const res = await axiosInstance.get("/messages/users");
-          set({ users: res.data });
+          // Initialize lastMessageTime if not present
+          const usersWithTimestamp = res.data.map(user => ({
+            ...user,
+            lastMessageTime: user.lastMessageTime || '',
+            lastMessage: user.lastMessage || ''
+          }));
+          set({ users: usersWithTimestamp });
         } catch (error) {
           console.error("Error fetching users:", error);
           toast.error(error.response?.data?.message || "Failed to load users");
@@ -152,7 +174,7 @@ export const useChatStore = create()(
       },
       
       sendMessage: async (messageData) => {
-        const { selectedUser, messages, socket } = get();
+        const { selectedUser, messages, socket, updateUserLastMessage } = get();
         const authUser = useAuthStore.getState()?.authUser;
         
         if (!selectedUser) {
@@ -176,6 +198,9 @@ export const useChatStore = create()(
           if (!messageExists) {
             set({ messages: [...messages, res.data] });
           }
+          
+          // Update the last message info for this user
+          updateUserLastMessage(selectedUser._id, res.data);
           
           if (socket && authUser) {
             socket.emit('newMessage', {

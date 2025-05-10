@@ -10,11 +10,26 @@ const Sidebar = () => {
     isUsersLoading, 
     selectedUser, 
     setSelectedUser,
-    onlineUsers
+    onlineUsers,
+    lastMessageTimes // Add this if not already in store
   } = useChatStore();
   const { authUser } = useAuthStore();
 
-  const filteredUsers = users.filter(user => user._id !== authUser?._id);
+  // Filter and sort users
+  const filteredAndSortedUsers = users
+    .filter(user => user._id !== authUser?._id)
+    .sort((a, b) => {
+      // First, put users with recent messages at the top
+      const aTime = a.lastMessageTime || new Date(0);
+      const bTime = b.lastMessageTime || new Date(0);
+      
+      // Convert to timestamp for comparison
+      const aTimestamp = new Date(aTime).getTime();
+      const bTimestamp = new Date(bTime).getTime();
+      
+      // Sort by most recent first
+      return bTimestamp - aTimestamp;
+    });
 
   if (isUsersLoading) {
     return (
@@ -58,7 +73,7 @@ const Sidebar = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto min-h-0">
-        {filteredUsers.length === 0 ? (
+        {filteredAndSortedUsers.length === 0 ? (
           <div className="p-8 text-center text-base-content/60">
             <Users className="w-16 h-16 mx-auto mb-3 text-base-content/30" />
             <p className="text-lg font-medium">No users found</p>
@@ -66,7 +81,7 @@ const Sidebar = () => {
           </div>
         ) : (
           <div className="space-y-2 p-4">
-            {filteredUsers.map((user) => {
+            {filteredAndSortedUsers.map((user) => {
               const isOnline = onlineUsers.includes(user._id);
               
               return (
@@ -108,7 +123,7 @@ const Sidebar = () => {
                         {user.fullName || user.username}
                       </h4>
                       <span className="text-xs opacity-60">
-                        {user.lastMessageTime || 'Now'}
+                        {formatTimeAgo(user.lastMessageTime)}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -128,6 +143,28 @@ const Sidebar = () => {
       </div>
     </div>
   );
+};
+
+// Helper function to format time ago
+const formatTimeAgo = (timestamp) => {
+  if (!timestamp) return '';
+  
+  const now = new Date();
+  const past = new Date(timestamp);
+  const diffInSeconds = Math.floor((now - past) / 1000);
+  
+  if (diffInSeconds < 60) {
+    return 'now';
+  } else if (diffInSeconds < 3600) {
+    const minutes = Math.floor(diffInSeconds / 60);
+    return `${minutes}m`;
+  } else if (diffInSeconds < 86400) {
+    const hours = Math.floor(diffInSeconds / 3600);
+    return `${hours}h`;
+  } else {
+    const days = Math.floor(diffInSeconds / 86400);
+    return `${days}d`;
+  }
 };
 
 export default Sidebar;
