@@ -18,7 +18,7 @@ const Sidebar = () => {
 
   if (isUsersLoading) {
     return (
-      <div className="w-full md:w-96 h-full bg-base-300">
+      <div className="w-full md:w-96 h-full bg-base-300 flex flex-col">
         <div className="p-6">
           <h2 className="text-xl font-bold text-base-content">Messages</h2>
         </div>
@@ -38,15 +38,15 @@ const Sidebar = () => {
   }
 
   return (
-    <div className="w-full md:w-96 h-full bg-base-300 overflow-hidden">
-      <div className="p-6 bg-base-300">
+    <div className="w-full md:w-96 h-full bg-base-300 flex flex-col">
+      <div className="p-6 bg-base-300 flex-shrink-0">
         <h2 className="text-xl font-bold flex items-center text-base-content">
           <Users className="w-6 h-6 mr-3" />
           Messages
         </h2>
       </div>
 
-      <div className="p-4 bg-base-300">
+      <div className="p-4 bg-base-300 flex-shrink-0">
         <div className="relative">
           <Search className="w-5 h-5 absolute left-3 top-3 text-base-content/40" />
           <input
@@ -57,7 +57,7 @@ const Sidebar = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto min-h-0">
         {filteredUsers.length === 0 ? (
           <div className="p-8 text-center text-base-content/60">
             <Users className="w-16 h-16 mx-auto mb-3 text-base-content/30" />

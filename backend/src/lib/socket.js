@@ -21,9 +21,13 @@ io.on('connection', (socket) => {
         socket.join(userId);
         onlineUsers.set(userId, socket.id);
         
-        socket.broadcast.emit('userOnline', userId);
+        // Broadcast to ALL users that this user is online
+        io.emit('userOnline', userId);
         
-        io.to(userId).emit('onlineUsers', Array.from(onlineUsers.keys()));
+        // Send current online users to the newly connected user
+        socket.emit('onlineUsers', Array.from(onlineUsers.keys()));
+        
+        console.log(`User ${userId} is now online. Total online: ${onlineUsers.size}`);
     });
 
     socket.on('joinChat', (chatId) => {
@@ -62,8 +66,10 @@ io.on('connection', (socket) => {
         for (let [userId, socketId] of onlineUsers.entries()) {
             if (socketId === socket.id) {
                 onlineUsers.delete(userId);
+                // Broadcast to ALL users that this user is offline
                 io.emit('userOffline', userId);
                 io.emit('onlineUsers', Array.from(onlineUsers.keys()));
+                console.log(`User ${userId} is now offline. Total online: ${onlineUsers.size}`);
                 break;
             }
         }
