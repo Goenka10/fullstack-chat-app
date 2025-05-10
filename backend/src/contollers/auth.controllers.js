@@ -2,7 +2,7 @@ import User from "../models/user.models.js"
 import bcrypt from "bcryptjs"
 import { generateToken } from "../lib/utils.js";
 import cloudinary from "../lib/cloudinary.js";
-import { io } from "../socket/socket.js";  // Import io
+import { io } from "../lib/socket.js";  // Import io
 
 
 export const signUp = async (req,res) => {
