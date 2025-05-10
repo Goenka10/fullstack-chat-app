@@ -90,7 +90,11 @@ const ProfilePage = () => {
         const compressedImage = await compressImage(file);
         setSelectedImg(compressedImage);
         
-        await updateProfile({ profilePic: compressedImage });
+        // Pass the full user object with updated profile pic
+        await updateProfile({ 
+          ...userData, 
+          profilePic: compressedImage 
+        });
         
         toast.dismiss();
         toast.success('Profile picture updated successfully');
@@ -109,7 +113,13 @@ const ProfilePage = () => {
           const base64Image = reader.result;
           setSelectedImg(base64Image);
           
-          await updateProfile({ profilePic: base64Image });
+          // Pass the full user object with updated profile pic
+          await updateProfile({ 
+            ...userData, 
+            profilePic: base64Image 
+          });
+          
+          toast.success('Profile picture updated successfully');
         } catch (error) {
           console.error("Failed to update profile picture:", error);
           setUploadError("Failed to upload image. Please try again.");
