@@ -115,9 +115,9 @@ const Navbar = () => {
           {/* Navigation Links */}
           <nav className="flex items-center space-x-6">
             <Link 
-              to="/chat" 
+              to="/" 
               className={`flex items-center space-x-2 px-4 py-2 rounded-md transition duration-200 text-lg ${
-                isActive('/chat') 
+                isActive('/') 
                   ? 'bg-indigo-500 text-white font-medium' 
                   : 'hover:bg-indigo-600'
               }`}
@@ -193,9 +193,9 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="md:hidden pt-4 pb-2 space-y-3">
             <Link 
-              to="/chat" 
+              to="/" 
               className={`flex items-center space-x-3 px-3 py-2 rounded-md transition duration-200 text-lg ${
-                isActive('/chat') 
+                isActive('/') 
                   ? 'bg-indigo-500 text-white font-medium' 
                   : 'hover:bg-indigo-600'
               }`}
